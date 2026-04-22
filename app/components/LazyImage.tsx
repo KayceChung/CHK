@@ -40,7 +40,7 @@ export function LazyImage({
   const [isLoaded, setIsLoaded] = useState(false);
   const [isInView, setIsInView] = useState(priority); // Load immediately if priority
   const [hasError, setHasError] = useState(false);
-  const imgRef = useRef<HTMLImageElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Intersection Observer for lazy loading
   useEffect(() => {
@@ -61,8 +61,8 @@ export function LazyImage({
       }
     );
 
-    if (imgRef.current) {
-      observer.observe(imgRef.current);
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
     }
 
     return () => {
@@ -86,6 +86,7 @@ export function LazyImage({
 
   return (
     <div 
+      ref={containerRef}
       className={`relative overflow-hidden bg-gray-100 ${className}`}
       style={containerStyle}
     >
@@ -104,7 +105,6 @@ export function LazyImage({
           
           {/* Fallback image */}
           <motion.img
-            ref={imgRef}
             src={src}
             alt={alt}
             srcSet={srcSet}
