@@ -8,7 +8,7 @@
     "build": "vite build",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist",
-    "postbuild": "powershell Copy-Item -Path 404.html -Destination dist/404.html -Force"
+    "postbuild": "node copy-404.js"
   },
   "dependencies": {
     "@emotion/react": "11.14.0",
