@@ -7,8 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "build:github-pages": "vite build --mode github-pages && node copy-404.js",
-    "predeploy": "npm run build:github-pages",
-    "deploy": "gh-pages -d dist",
+    "deploy": "npm run build:github-pages && node sync-pages.js",
     "postbuild": "node copy-404.js"
   },
   "dependencies": {
@@ -72,7 +71,6 @@
   "devDependencies": {
     "@tailwindcss/vite": "4.1.12",
     "@vitejs/plugin-react": "4.7.0",
-    "gh-pages": "^6.3.0",
     "rollup-plugin-visualizer": "^7.0.1",
     "tailwindcss": "4.1.12",
     "vite": "^6.4.1"
