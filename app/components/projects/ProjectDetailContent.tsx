@@ -53,11 +53,28 @@ export default function ProjectDetailContent({ project }: { project: any }) {
 
   const metrics = extractMetrics(content.result);
   const liveUrl = content.result.match(/https?:\/\/[^\s]+/)?.[0];
+  const liveLabelRegex = /(?:View live|Xem trực tiếp|在线查看)\s*:\s*https?:\/\/[^\s]+/gi;
+  const cleanedResult = content.result.replace(liveLabelRegex, '').trim();
+
+  const handleOpenLive = () => {
+    if (!liveUrl) return;
+
+    const message =
+      language === 'vi'
+        ? 'Bạn sắp rời portfolio để mở ứng dụng live. Tiếp tục?'
+        : language === 'zh'
+          ? '您将离开作品集并打开在线应用，是否继续？'
+          : 'You are about to leave this portfolio and open the live app. Continue?';
+
+    if (window.confirm(message)) {
+      window.open(liveUrl, '_blank', 'noopener,noreferrer');
+    }
+  };
   
   const contextParsed = parseContent(content.context);
   const problemParsed = parseContent(content.problem);
   const solutionParsed = parseContent(content.solution);
-  const resultParsed = parseContent(content.result.replace(/View live:.*$/i, ''));
+  const resultParsed = parseContent(cleanedResult);
 
   return (
     <article className="max-w-4xl mx-auto py-16 px-4 sm:px-8">
@@ -103,16 +120,19 @@ export default function ProjectDetailContent({ project }: { project: any }) {
               );
             })}
             {liveUrl && (
-              <a 
-                href={liveUrl} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="bg-gradient-to-br from-blue-600 to-cyan-600 p-6 rounded-2xl shadow-md hover:shadow-xl transition-all group col-span-2 md:col-span-1"
+              <button
+                type="button"
+                onClick={handleOpenLive}
+                className="bg-gradient-to-br from-blue-600 to-cyan-600 p-6 rounded-2xl shadow-md hover:shadow-xl transition-all group col-span-2 md:col-span-1 text-left"
               >
                 <ExternalLink className="size-8 text-white mb-2 group-hover:scale-110 transition-transform" />
-                <div className="text-lg font-bold text-white">View Live</div>
-                <div className="text-sm text-white/90">Demo Available</div>
-              </a>
+                <div className="text-lg font-bold text-white">
+                  {language === 'vi' ? 'Mở ứng dụng live' : language === 'zh' ? '打开在线应用' : 'Open Live App'}
+                </div>
+                <div className="text-sm text-white/90">
+                  {language === 'vi' ? 'Có bước xác nhận trước khi rời trang' : language === 'zh' ? '离开当前页面前会先确认' : 'Confirmation shown before leaving page'}
+                </div>
+              </button>
             )}
           </div>
         )}

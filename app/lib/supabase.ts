@@ -3,14 +3,19 @@ import type { Database } from './database.types';
 
 // Supabase URL and Anon Key
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://zuqwohycmkynlknobwuv.supabase.co';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+const supabaseAnonKey = (import.meta.env.VITE_SUPABASE_ANON_KEY || '').trim();
+export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey);
 
-if (!supabaseAnonKey) {
-  console.warn('⚠️ VITE_SUPABASE_ANON_KEY is not set. Please add it to your .env file.');
+if (!isSupabaseConfigured) {
+  console.warn('VITE_SUPABASE_ANON_KEY is not set. Running in fallback mode with static/local data.');
 }
 
+// Supabase client requires a non-empty key at construction time.
+// Use a harmless placeholder when env is missing so the app does not crash.
+const safeSupabaseAnonKey = supabaseAnonKey || 'missing-supabase-anon-key';
+
 // Create Supabase client
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+export const supabase = createClient<Database>(supabaseUrl, safeSupabaseAnonKey, {
   auth: {
     persistSession: false, // Portfolio website doesn't need auth persistence
   },
