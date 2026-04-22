@@ -9,7 +9,7 @@
  * - Error handling
  */
 
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { motion } from 'motion/react';
 
 interface LazyImageProps {
@@ -38,37 +38,8 @@ export function LazyImage({
   onError,
 }: LazyImageProps) {
   const [isLoaded, setIsLoaded] = useState(false);
-  const [isInView, setIsInView] = useState(priority); // Load immediately if priority
+  const [isInView] = useState(true);
   const [hasError, setHasError] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  // Intersection Observer for lazy loading
-  useEffect(() => {
-    if (priority) return; // Skip observer if priority image
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setIsInView(true);
-            observer.disconnect();
-          }
-        });
-      },
-      {
-        rootMargin: '50px', // Start loading 50px before image enters viewport
-        threshold: 0.01,
-      }
-    );
-
-    if (containerRef.current) {
-      observer.observe(containerRef.current);
-    }
-
-    return () => {
-      observer.disconnect();
-    };
-  }, [priority]);
 
   const handleLoad = () => {
     setIsLoaded(true);
@@ -86,7 +57,6 @@ export function LazyImage({
 
   return (
     <div 
-      ref={containerRef}
       className={`relative overflow-hidden bg-gray-100 ${className}`}
       style={containerStyle}
     >
