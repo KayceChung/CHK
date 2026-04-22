@@ -5,7 +5,7 @@ import react from '@vitejs/plugin-react'
 import { visualizer } from 'rollup-plugin-visualizer'
 
 export default defineConfig({
-  base: '/CHK/', // Đường dẫn cho GitHub Pages
+  base: '/', // Vercel deploys at root
   plugins: [
     react(),
     tailwindcss(),
