@@ -1,0 +1,13 @@
+[
+  {
+    "slug": "real-time-data-collection-system",
+    "title": "Real-Time Data Collection System",
+    "description": "A mid-sized bus company needed to improve on-time performance across multiple routes.",
+    "problem": "Delays in data collection led to late buses and poor service reliability.",
+    "solution": "Designed and implemented a real-time data collection workflow using AppSheet and SQL.",
+    "tags": ["AppSheet", "SQL", "Data Analysis", "Process Optimization"],
+    "techStack": ["AppSheet", "SQL", "Google Sheets"],
+    "thumbnail": "/images/real-time-data-collection.png",
+    "content": "## Overview\nA mid-sized bus company needed to improve on-time performance across multiple routes.\n\n## Problem\nDelays in data collection led to late buses and poor service reliability.\n\n## Solution\nDesigned and implemented a real-time data collection workflow using AppSheet and SQL.\n\n## Tech Stack\n- AppSheet\n- SQL\n- Google Sheets\n\n## Results\nReduced average delay from 5-10 minutes to under 5 minutes on all routes.\n\n## Images\n![Dashboard](/images/real-time-data-collection.png)\n\n## Video\n[![Demo Video](https://img.youtube.com/vi/dQw4w9WgXcQ/0.jpg)](https://www.youtube.com/watch?v=dQw4w9WgXcQ)"
+  }
+]

@@ -1,42 +1,108 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useDebouncedLocalStorage } from '../hooks/useLocalStorage';
+import { STORAGE_KEYS } from '../utils/storage';
+import { submitContactFormWithRetry, getRateLimitResetTime } from '../utils/formSubmit';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
-import { Mail, Linkedin, Github } from 'lucide-react';
+import { Mail, Linkedin, Github, Loader2 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { toast } from 'sonner';
 
+interface FormData {
+  name: string;
+  email: string;
+  message: string;
+}
+
 export function Contact() {
   const { t } = useLanguage();
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    message: '',
-  });
+  
+  // Use debounced localStorage for auto-save (500ms delay)
+  const [savedDraft, setSavedDraft, clearDraft, isSaving] = useDebouncedLocalStorage<FormData>(
+    STORAGE_KEYS.CONTACT_FORM_DRAFT,
+    { name: '', email: '', message: '' },
+    500
+  );
+  
+  const [formData, setFormData] = useState<FormData>(savedDraft);
+  const [showRestoreDialog, setShowRestoreDialog] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Thay YOUR_FORMSPREE_ENDPOINT bằng endpoint thực tế của bạn, ví dụ: https://formspree.io/f/yourid
-  const FORMSPREE_ENDPOINT = "https://formspree.io/f/mnjnwgan";
+  // Check if there's a saved draft on mount
+  useEffect(() => {
+    const hasDraft = savedDraft.name || savedDraft.email || savedDraft.message;
+    if (hasDraft && !formData.name && !formData.email && !formData.message) {
+      setShowRestoreDialog(true);
+    }
+  }, []);
+
+  // Sync formData to savedDraft for auto-save
+  useEffect(() => {
+    setSavedDraft(formData);
+  }, [formData, setSavedDraft]);
+
+  const handleRestoreDraft = () => {
+    setFormData(savedDraft);
+    setShowRestoreDialog(false);
+    toast.info('Draft restored');
+  };
+
+  const handleDiscardDraft = () => {
+    clearDraft();
+    setShowRestoreDialog(false);
+    toast.info('Draft discarded');
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Prevent double submission
+    if (isSubmitting) return;
+    
+    setIsSubmitting(true);
+    
+    // Show loading toast
+    const loadingToastId = toast.loading('Sending your message...');
+    
     try {
-      const response = await fetch(FORMSPREE_ENDPOINT, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
-      if (response.ok) {
-        toast.success('Gửi liên hệ thành công! Tôi sẽ phản hồi sớm.');
+      // Submit with retry logic (up to 2 retries)
+      const result = await submitContactFormWithRetry(formData);
+      
+      // Dismiss loading toast
+      toast.dismiss(loadingToastId);
+      
+      if (result.success) {
+        // Success!
+        toast.success(result.message || 'Message sent successfully!');
+        
+        // Clear form and draft
         setFormData({ name: '', email: '', message: '' });
+        clearDraft();
       } else {
-        toast.error('Gửi liên hệ thất bại. Vui lòng thử lại sau.');
+        // Handle different error types
+        if (result.error === 'RATE_LIMITED') {
+          const resetTime = getRateLimitResetTime();
+          toast.error(`Too many submissions. Please wait ${Math.ceil(resetTime / 60)} minutes.`);
+        } else if (result.error === 'VALIDATION_ERROR') {
+          toast.error(result.message);
+        } else if (result.error === 'MISSING_ACCESS_KEY') {
+          toast.error('Form not configured. Please contact the site administrator.');
+          console.error('Web3Forms access key not configured in formSubmit.ts');
+        } else {
+          toast.error(result.message || 'Failed to send message. Please try again.');
+        }
       }
     } catch (error) {
-      toast.error('Có lỗi xảy ra. Vui lòng thử lại sau.');
+      // Dismiss loading toast
+      toast.dismiss(loadingToastId);
+      
+      // Unexpected error
+      console.error('Form submission error:', error);
+      toast.error('An unexpected error occurred. Please try again later.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -50,6 +116,36 @@ export function Contact() {
   return (
     <section id="contact" className="py-20 bg-gradient-to-br from-gray-50 to-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Restore Draft Dialog */}
+        {showRestoreDialog && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8 p-4 bg-blue-50 border-2 border-blue-200 rounded-lg flex items-center justify-between"
+          >
+            <p className="text-blue-900">
+              You have a saved draft. Would you like to restore it?
+            </p>
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleDiscardDraft}
+                className="border-blue-300 text-blue-700 hover:bg-blue-100"
+              >
+                Discard
+              </Button>
+              <Button
+                size="sm"
+                onClick={handleRestoreDraft}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                Restore
+              </Button>
+            </div>
+          </motion.div>
+        )}
+
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -78,16 +174,25 @@ export function Contact() {
             transition={{ duration: 0.6, delay: 0.2 }}
             viewport={{ once: true }}
           >
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6" aria-label="Contact form">
+              {/* Auto-save indicator */}
+              {isSaving && (
+                <div className="flex items-center gap-2 text-sm text-gray-500" role="status" aria-live="polite">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                  <span>Saving draft...</span>
+                </div>
+              )}
+              
               <div>
                 <label htmlFor="name" className="block text-gray-700 mb-2">
-                  {t('contact.name')}
+                  {t('contact.name')} <span className="text-red-500" aria-label="required">*</span>
                 </label>
                 <Input
                   id="name"
                   name="name"
                   type="text"
                   required
+                  aria-required="true"
                   value={formData.name}
                   onChange={handleChange}
                   className="w-full"
@@ -97,13 +202,14 @@ export function Contact() {
 
               <div>
                 <label htmlFor="email" className="block text-gray-700 mb-2">
-                  {t('contact.email')}
+                  {t('contact.email')} <span className="text-red-500" aria-label="required">*</span>
                 </label>
                 <Input
                   id="email"
                   name="email"
                   type="email"
                   required
+                  aria-required="true"
                   value={formData.email}
                   onChange={handleChange}
                   className="w-full"
@@ -113,12 +219,13 @@ export function Contact() {
 
               <div>
                 <label htmlFor="message" className="block text-gray-700 mb-2">
-                  {t('contact.message')}
+                  {t('contact.message')} <span className="text-red-500" aria-label="required">*</span>
                 </label>
                 <Textarea
                   id="message"
                   name="message"
                   required
+                  aria-required="true"
                   value={formData.message}
                   onChange={handleChange}
                   className="w-full min-h-[150px]"
@@ -129,10 +236,24 @@ export function Contact() {
               <Button
                 type="submit"
                 size="lg"
-                className="w-full bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600"
+                disabled={isSubmitting}
+                className="w-full bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                aria-label={isSubmitting ? "Sending message" : "Send message"}
               >
-                {t('contact.send')}
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  t('contact.send')
+                )}
               </Button>
+
+              {/* Rate limit info */}
+              <p className="text-xs text-gray-500 text-center">
+                Protected by rate limiting. Maximum 3 submissions per 5 minutes.
+              </p>
             </form>
           </motion.div>
 

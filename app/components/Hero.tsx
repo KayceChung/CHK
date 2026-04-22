@@ -1,3 +1,5 @@
+import profileImage from '../assets/profile.png';
+import { HologramImage } from './HologramImage';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Button } from './ui/button';
 import { Github, Linkedin, Mail, ExternalLink } from 'lucide-react';
@@ -6,6 +8,8 @@ import { motion } from 'motion/react';
 
 export function Hero() {
   const { t } = useLanguage();
+
+  // Sử dụng import từ assets cho ảnh hero
 
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
@@ -52,51 +56,31 @@ export function Hero() {
             transition={{ duration: 0.8 }}
             className="text-center lg:text-left"
           >
-            <motion.p 
-              className="text-cyan-400 mb-2 uppercase tracking-widest text-sm font-mono"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
+            <motion.h1
+              className="text-4xl sm:text-5xl lg:text-6xl mb-4 font-bold text-gray-900"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
             >
-              {t('hero.greeting')}
-            </motion.p>
-            
-            <motion.h1 
-              className="text-5xl sm:text-6xl lg:text-7xl mb-4"
+                {t('hero.greeting')} <span className="text-cyan-600">Khang</span>
+            </motion.h1>
+
+            <motion.h2
+              className="text-xl sm:text-2xl text-gray-800 mb-4 font-normal"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
             >
-              <span className="bg-gradient-to-r from-cyan-600 via-blue-600 to-purple-600 bg-clip-text text-transparent font-bold">
-                Chung Hiến Khang
-              </span>
-            </motion.h1>
-            
-            <motion.h2 
-              className="text-2xl sm:text-3xl text-gray-800 mb-6 font-light"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
+                {t('hero.title')}
+            </motion.h2>
+
+            <motion.p
+              className="text-gray-700 mb-8 max-w-2xl leading-relaxed text-base sm:text-lg"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
             >
-              {t('hero.title')}
-            </motion.h2>
-            
-            <motion.p 
-              className="text-xl text-cyan-600 mb-4 font-medium"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.45 }}
-            >
-              {t('hero.subtitle')}
-            </motion.p>
-            
-            <motion.p 
-              className="text-gray-700 mb-8 max-w-2xl leading-relaxed"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
-            >
-              {t('hero.description')}
+                {t('hero.description')}
             </motion.p>
 
             <motion.div 
@@ -133,31 +117,35 @@ export function Hero() {
                 href="https://github.com"
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label="Visit GitHub profile"
                 className="p-3 rounded-lg bg-slate-800/50 border border-cyan-500/30 hover:border-cyan-400 hover:bg-cyan-500/10 transition-all backdrop-blur-sm group"
               >
-                <Github className="size-5 text-gray-400 group-hover:text-cyan-400 transition-colors" />
+                <Github className="size-5 text-gray-400 group-hover:text-cyan-400 transition-colors" aria-hidden="true" />
               </a>
               <a
                 href="https://www.linkedin.com/in/hien-khang-chung-677105284/"
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label="Visit LinkedIn profile"
                 className="p-3 rounded-lg bg-slate-800/50 border border-cyan-500/30 hover:border-cyan-400 hover:bg-cyan-500/10 transition-all backdrop-blur-sm group"
               >
-                <Linkedin className="size-5 text-gray-400 group-hover:text-cyan-400 transition-colors" />
+                <Linkedin className="size-5 text-gray-400 group-hover:text-cyan-400 transition-colors" aria-hidden="true" />
               </a>
               <a
                 href="mailto:chunghienkhang@gmail.com"
+                aria-label="Send email to chunghienkhang@gmail.com"
                 className="p-3 rounded-lg bg-slate-800/50 border border-cyan-500/30 hover:border-cyan-400 hover:bg-cyan-500/10 transition-all backdrop-blur-sm group"
               >
-                <Mail className="size-5 text-gray-400 group-hover:text-cyan-400 transition-colors" />
+                <Mail className="size-5 text-gray-400 group-hover:text-cyan-400 transition-colors" aria-hidden="true" />
               </a>
               <a
                 href="https://www.datacamp.com/portfolio/chunghienkhang"
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label="Visit DataCamp portfolio"
                 className="p-3 rounded-lg bg-slate-800/50 border border-cyan-500/30 hover:border-cyan-400 hover:bg-cyan-500/10 transition-all backdrop-blur-sm group"
               >
-                <ExternalLink className="size-5 text-gray-400 group-hover:text-cyan-400 transition-colors" />
+                <ExternalLink className="size-5 text-gray-400 group-hover:text-cyan-400 transition-colors" aria-hidden="true" />
               </a>
             </motion.div>
           </motion.div>
@@ -167,7 +155,7 @@ export function Hero() {
             initial={{ opacity: 0, scale: 0.8, rotateY: -15 }}
             animate={{ opacity: 1, scale: 1, rotateY: 0 }}
             transition={{ duration: 0.8, delay: 0.3 }}
-            className="relative perspective-1000"
+            className="relative perspective-1000 lg:-ml-8"
           >
             {/* Holographic Frame */}
             <div className="relative group">
@@ -180,34 +168,13 @@ export function Hero() {
               {/* Glowing Border */}
               <div className="absolute inset-0 rounded-2xl border-2 border-cyan-500/50 shadow-lg shadow-cyan-500/50" />
               
-              {/* Main Image Container */}
-              <div className="relative rounded-2xl overflow-hidden">
-                {/* Background Gradient */}
-                <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/20 via-blue-500/20 to-purple-500/20" />
-                
-                {/* Image */}
-                <img
-                  src={profileImage}
-                  alt="Chung Hiến Khang"
-                  className="w-full h-auto relative z-10"
-                  style={{
-                    filter: 'contrast(1.2) brightness(1.1)',
-                    mixBlendMode: 'lighten',
-                  }}
-                />
-                
-                {/* Holographic Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-tr from-cyan-500/30 via-transparent to-blue-500/30 opacity-50 mix-blend-screen" />
-                
-                {/* Scan Line Effect */}
-                <motion.div
-                  className="absolute inset-0 pointer-events-none"
-                  style={{
-                    background: 'linear-gradient(180deg, transparent 0%, rgba(6, 182, 212, 0.1) 50%, transparent 100%)',
-                    height: '100px',
-                  }}
-                  animate={{ y: ['-100px', '100%'] }}
-                  transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+              {/* Main Image Container with Hologram Effect */}
+              <div className="relative rounded-2xl overflow-visible">
+                {/* Priority load for above-the-fold hero image */}
+                <HologramImage 
+                  src={profileImage} 
+                  alt="Chung Hiến Khang professional portrait" 
+                  priority={true}
                 />
               </div>
               

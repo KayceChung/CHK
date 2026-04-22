@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { getStorageItem, setStorageItem, STORAGE_KEYS } from '../utils/storage';
 
 // Language Context for trilingual support (EN/VI/ZH) - Updated
 type Language = 'en' | 'vi' | 'zh';
@@ -303,7 +304,15 @@ const translations = {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguage] = useState<Language>('en');
+  // Initialize language from localStorage or default to 'en'
+  const [language, setLanguage] = useState<Language>(() => {
+    return getStorageItem<Language>(STORAGE_KEYS.LANGUAGE, 'en', 'localStorage');
+  });
+
+  // Persist language to localStorage when it changes
+  useEffect(() => {
+    setStorageItem(STORAGE_KEYS.LANGUAGE, language, 'localStorage');
+  }, [language]);
 
   const t = (key: string): string => {
     return translations[language][key as keyof typeof translations.en] || key;

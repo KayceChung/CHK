@@ -1,3 +1,85 @@
-@import './fonts.css';
+/* @import './fonts.css'; // Uncomment and add fonts.css if you want to use custom fonts */
 @import './tailwind.css';
 @import './theme.css';
+
+/* ===================================
+   ACCESSIBILITY
+   =================================== */
+
+/**
+ * Respect user's motion preferences
+ * Disable animations for users who prefer reduced motion
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/**
+ * Focus Visible Styles
+ * Clear focus indicators for keyboard navigation
+ */
+:focus-visible {
+  outline: 2px solid #06b6d4; /* cyan-500 */
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Remove default focus outline for mouse users */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/**
+ * Skip to Main Content Link
+ * Hidden until focused for keyboard navigation
+ */
+.skip-to-main {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: #0ea5e9; /* blue-500 */
+  color: white;
+  padding: 8px 16px;
+  text-decoration: none;
+  z-index: 100;
+  border-radius: 0 0 4px 0;
+}
+
+.skip-to-main:focus {
+  top: 0;
+}
+
+/**
+ * Screen Reader Only Text
+ * Visually hidden but accessible to screen readers
+ */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/**
+ * Ensure sufficient color contrast
+ * Minimum 4.5:1 for normal text, 3:1 for large text (18pt+)
+ */
+.text-contrast-low {
+  color: #6b7280; /* gray-500 - Use with caution on light backgrounds */
+}
+
+.text-contrast-high {
+  color: #1f2937; /* gray-800 - Better contrast */
+}

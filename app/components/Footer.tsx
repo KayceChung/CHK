@@ -5,7 +5,7 @@ export function Footer() {
   const { t } = useLanguage();
 
   return (
-    <footer className="bg-gray-900 text-white py-12">
+    <footer className="bg-gray-900 text-white py-12" role="contentinfo">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid md:grid-cols-3 gap-8 mb-8">
           {/* Brand */}
@@ -21,7 +21,7 @@ export function Footer() {
           </div>
 
           {/* Quick Links */}
-          <div>
+          <nav aria-label="Footer navigation">
             <h3 className="mb-4">Quick Links</h3>
             <ul className="space-y-2">
               <li>
@@ -65,33 +65,36 @@ export function Footer() {
                 </button>
               </li>
             </ul>
-          </div>
+          </nav>
 
           {/* Social */}
           <div>
             <h3 className="mb-4">{t('footer.connect')}</h3>
-            <div className="flex gap-4">
+            <div className="flex gap-4" role="list">
               <a
                 href="https://github.com"
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label="Visit GitHub profile"
                 className="p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors"
               >
-                <Github className="size-5" />
+                <Github className="size-5" aria-hidden="true" />
               </a>
               <a
                 href="https://linkedin.com"
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label="Visit LinkedIn profile"
                 className="p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors"
               >
-                <Linkedin className="size-5" />
+                <Linkedin className="size-5" aria-hidden="true" />
               </a>
               <a
                 href="mailto:contact@example.com"
+                aria-label="Send email to contact"
                 className="p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors"
               >
-                <Mail className="size-5" />
+                <Mail className="size-5" aria-hidden="true" />
               </a>
             </div>
           </div>

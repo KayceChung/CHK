@@ -1,16 +1,22 @@
+import { lazy, Suspense, useEffect } from 'react';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { Header } from './components/Header';
+import { Routes, Route } from 'react-router-dom';
+import ConversionCTA from './components/cta/ConversionCTA';
 import { Hero } from './components/Hero';
 import { About } from './components/About';
 import { Services } from './components/Services';
 import { TechStack } from './components/TechStack';
 import { Education } from './components/Education';
 import { Experience } from './components/Experience';
-import { Projects } from './components/Projects';
 import { Contact } from './components/Contact';
 import { Footer } from './components/Footer';
 import { Toaster } from './components/ui/sonner';
-import { useEffect } from 'react';
+import { PageLoadingSpinner } from './components/LoadingSpinner';
+
+// Lazy load page components for better performance
+const Projects = lazy(() => import('./pages/Projects'));
+const ProjectDetail = lazy(() => import('./pages/ProjectDetail'));
 
 // Main App Component - Updated with trilingual support
 export default function App() {
@@ -71,16 +77,74 @@ export default function App() {
   return (
     <LanguageProvider>
       <div className="min-h-screen bg-white">
+        {/* Skip to main content link for keyboard navigation */}
+        <a href="#main-content" className="skip-to-main">
+          Skip to main content
+        </a>
+        
         <Header />
-        <main>
-          <Hero />
-          <About />
-          <Services />
-          <TechStack />
-          <Education />
-          <Experience />
-          <Projects />
-          <Contact />
+        <main id="main-content" aria-label="Main content">
+          <Routes>
+            <Route path="/" element={
+              <>
+                <Hero />
+                <ConversionCTA />
+                <About />
+                <Services />
+                <TechStack />
+                <Education />
+                <Experience />
+                <Contact />
+              </>
+            } />
+            <Route path="/CHK" element={
+              <>
+                <Hero />
+                <ConversionCTA />
+                <About />
+                <Services />
+                <TechStack />
+                <Education />
+                <Experience />
+                <Contact />
+              </>
+            } />
+            <Route path="/CHK/" element={
+              <>
+                <Hero />
+                <ConversionCTA />
+                <About />
+                <Services />
+                <TechStack />
+                <Education />
+                <Experience />
+                <Contact />
+              </>
+            } />
+            {/* Lazy loaded routes with Suspense */}
+            <Route path="/projects" element={
+              <Suspense fallback={<PageLoadingSpinner />}>
+                <Projects />
+              </Suspense>
+            } />
+            <Route path="/CHK/projects" element={
+              <Suspense fallback={<PageLoadingSpinner />}>
+                <Projects />
+              </Suspense>
+            } />
+            <Route path="/projects/:slug" element={
+              <Suspense fallback={<PageLoadingSpinner />}>
+                <ProjectDetail />
+              </Suspense>
+            } />
+            <Route path="/CHK/projects/:slug" element={
+              <Suspense fallback={<PageLoadingSpinner />}>
+                <ProjectDetail />
+              </Suspense>
+            } />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/CHK/contact" element={<Contact />} />
+          </Routes>
         </main>
         <Footer />
         <Toaster position="top-right" />
