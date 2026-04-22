@@ -90,7 +90,7 @@ export default function ProjectDetailContent({ project }: { project: any }) {
         </h1>
 
         {/* Key Metrics */}
-        {metrics.length > 0 && (
+        {(metrics.length > 0 || liveUrl) && (
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
             {metrics.map((metric, idx) => {
               const Icon = metric.icon;

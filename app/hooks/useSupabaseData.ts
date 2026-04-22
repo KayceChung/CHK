@@ -9,6 +9,38 @@ type Service = Database['public']['Tables']['services']['Row'];
 type TechSkill = Database['public']['Tables']['tech_skills']['Row'];
 type ContactSubmission = Database['public']['Tables']['contact_submissions']['Insert'];
 
+type FrontendProject = {
+  slug: string;
+  image: string;
+  tags: string[];
+  content: {
+    en: {
+      title: string;
+      context: string;
+      problem: string;
+      solution: string;
+      result: string;
+      cta: string;
+    };
+    vi: {
+      title: string;
+      context: string;
+      problem: string;
+      solution: string;
+      result: string;
+      cta: string;
+    };
+    zh: {
+      title: string;
+      context: string;
+      problem: string;
+      solution: string;
+      result: string;
+      cta: string;
+    };
+  };
+};
+
 // =============================================
 // HOOK: useProjects
 // Purpose: Fetch all published projects
@@ -64,11 +96,11 @@ export function useProject(slug: string) {
           .select('*')
           .eq('slug', slug)
           .eq('is_published', true)
-          .single();
+          .maybeSingle();
 
         if (fetchError) throw fetchError;
 
-        setProject(data);
+        setProject(data || null);
         setError(null);
       } catch (err: any) {
         console.error('Error fetching project:', err);
@@ -253,10 +285,22 @@ export async function submitContactForm(data: ContactSubmission) {
 // Purpose: Convert database row to frontend format
 // =============================================
 
-export function transformProjectForLanguage(project: Project, language: 'en' | 'vi' | 'zh') {
+function normalizeProjectImage(image: string) {
+  if (/^(https?:|data:)/i.test(image)) {
+    return image;
+  }
+
+  const baseUrl = import.meta.env.BASE_URL || '/';
+  const normalizedBaseUrl = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
+  const normalizedImage = image.startsWith('/') ? image.slice(1) : image;
+
+  return `${normalizedBaseUrl}${normalizedImage}`;
+}
+
+export function transformProjectForLanguage(project: Project): FrontendProject {
   return {
     slug: project.slug,
-    image: project.image,
+    image: normalizeProjectImage(project.image),
     tags: project.tags,
     content: {
       en: {

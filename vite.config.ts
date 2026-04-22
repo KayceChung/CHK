@@ -4,8 +4,8 @@ import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { visualizer } from 'rollup-plugin-visualizer'
 
-export default defineConfig({
-  base: '/', // Vercel deploys at root
+export default defineConfig(({ mode }) => ({
+  base: mode === 'github-pages' ? '/CHK/' : '/',
   plugins: [
     react(),
     tailwindcss(),
@@ -52,4 +52,4 @@ export default defineConfig({
     // Set chunk size warning limit
     chunkSizeWarningLimit: 1000,
   },
-})
+}))
