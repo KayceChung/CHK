@@ -6,6 +6,8 @@ import { useProjects, transformProjectForLanguage } from '../hooks/useSupabaseDa
 import ProjectFilterSidebar from '../components/projects/ProjectFilterSidebar';
 import ProjectList from '../components/projects/ProjectList';
 
+const FORCE_STATIC_IMAGE_SLUGS = new Set(['chung-tieu-dinh-portfolio']);
+
 export default function Projects() {
   const { projects: supabaseProjects } = useProjects();
 
@@ -27,6 +29,16 @@ export default function Projects() {
     supabaseProjects
       .map(transformProjectForLanguage)
       .forEach((project) => {
+        const staticProject = mergedProjects.get(project.slug);
+
+        if (FORCE_STATIC_IMAGE_SLUGS.has(project.slug) && staticProject?.image) {
+          mergedProjects.set(project.slug, {
+            ...project,
+            image: staticProject.image,
+          });
+          return;
+        }
+
         mergedProjects.set(project.slug, project);
       });
 

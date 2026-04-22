@@ -5,6 +5,8 @@ import { useProject, transformProjectForLanguage } from '../hooks/useSupabaseDat
 import ProjectDetailContent from '../components/projects/ProjectDetailContent';
 import { Button } from '../components/ui/button';
 
+const FORCE_STATIC_IMAGE_SLUGS = new Set(['chung-tieu-dinh-portfolio']);
+
 export default function ProjectDetail() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
@@ -12,9 +14,22 @@ export default function ProjectDetail() {
   const { project: supabaseProject, loading } = useProject(slug || '');
   
   const fallbackProject = projectsData.find((p: any) => p.slug === slug);
-  const project = supabaseProject
-    ? transformProjectForLanguage(supabaseProject)
-    : fallbackProject;
+  const project = (() => {
+    if (!supabaseProject) {
+      return fallbackProject;
+    }
+
+    const transformed = transformProjectForLanguage(supabaseProject);
+
+    if (fallbackProject && FORCE_STATIC_IMAGE_SLUGS.has(transformed.slug)) {
+      return {
+        ...transformed,
+        image: fallbackProject.image,
+      };
+    }
+
+    return transformed;
+  })();
 
   if (!project && loading) {
     return (
