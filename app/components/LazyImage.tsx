@@ -16,6 +16,7 @@ interface LazyImageProps {
   src: string;
   alt: string;
   className?: string;
+  imgClassName?: string;
   webpSrc?: string;
   srcSet?: string;
   sizes?: string;
@@ -29,6 +30,7 @@ export function LazyImage({
   src,
   alt,
   className = '',
+  imgClassName = '',
   webpSrc,
   srcSet,
   sizes,
@@ -80,7 +82,7 @@ export function LazyImage({
             srcSet={srcSet}
             sizes={sizes}
             className={`
-              w-full h-full object-cover transition-opacity duration-300
+              w-full h-full object-cover transition-opacity duration-300 ${imgClassName}
               ${isLoaded ? 'opacity-100' : 'opacity-0'}
               ${hasError ? 'hidden' : ''}
             `}

@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { ExternalLink, Info, AlertCircle, Lightbulb, TrendingUp, Target, Users, Award } from 'lucide-react';
+import { ExternalLink, Info, AlertCircle, Lightbulb, TrendingUp, Target, Users, Award, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function ProjectDetailContent({ project }: { project: any }) {
   const { language } = useLanguage();
   const content = project.content[language as keyof typeof project.content];
+  const [activeSlide, setActiveSlide] = useState(0);
 
   // Parse content into structured format with better grouping
   const parseContent = (text: string) => {
@@ -75,31 +76,153 @@ export default function ProjectDetailContent({ project }: { project: any }) {
   const problemParsed = parseContent(content.problem);
   const solutionParsed = parseContent(content.solution);
   const resultParsed = parseContent(cleanedResult);
+  const galleryItems = useMemo(
+    () => (Array.isArray(project.gallery) ? project.gallery : []),
+    [project.gallery]
+  );
+
+  useEffect(() => {
+    setActiveSlide(0);
+  }, [project.slug, galleryItems.length]);
+
+  const goToSlide = (index: number) => {
+    if (!galleryItems.length) return;
+    const nextIndex = (index + galleryItems.length) % galleryItems.length;
+    setActiveSlide(nextIndex);
+  };
+
+  const goToPrevSlide = () => goToSlide(activeSlide - 1);
+  const goToNextSlide = () => goToSlide(activeSlide + 1);
+
+  const sectionTitle = {
+    context: language === 'vi' ? 'Bối cảnh' : language === 'zh' ? '背景' : 'Context',
+    problem: language === 'vi' ? 'Vấn đề' : language === 'zh' ? '问题' : 'Problem',
+    solution: language === 'vi' ? 'Giải pháp' : language === 'zh' ? '方案' : 'Solution',
+    result: language === 'vi' ? 'Kết quả' : language === 'zh' ? '成果' : 'Result',
+    overview: language === 'vi' ? 'Tổng quan sản phẩm' : language === 'zh' ? '产品概览' : 'Product Overview',
+  };
 
   return (
     <article className="max-w-4xl mx-auto py-16 px-4 sm:px-8">
       {/* Header Section with Hero Image */}
       <header className="mb-16">
         {project.image && (
-          <div className="relative rounded-3xl overflow-hidden shadow-2xl mb-8 group">
-            <img 
-              src={project.image} 
-              alt={`${content.title} project banner`}
-              loading="lazy"
-              decoding="async"
-              className="w-full h-64 sm:h-80 object-cover transition-transform duration-500 group-hover:scale-105" 
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-            <div className="absolute bottom-6 left-6 right-6">
-              <div className="flex flex-wrap gap-2">
-                {project.tags.map((tag: string) => (
-                  <span key={tag} className="bg-white/90 backdrop-blur-sm text-slate-800 px-3 py-1 rounded-full text-xs font-semibold shadow-lg">
-                    {tag}
-                  </span>
-                ))}
-              </div>
+          <div className="mb-8 rounded-3xl border border-slate-200 bg-white p-4 sm:p-5 shadow-xl">
+            <div className="mb-3 flex items-center justify-between text-xs uppercase tracking-[0.18em] text-slate-500">
+              <span>{sectionTitle.overview}</span>
+              <span>{project.tags.length} tags</span>
+            </div>
+            <div className="rounded-2xl border border-slate-200 bg-[linear-gradient(160deg,#f8fafc_0%,#ecfeff_100%)] p-3">
+              <img 
+                src={project.image} 
+                alt={`${content.title} project banner`}
+                loading="lazy"
+                decoding="async"
+                className="w-full h-[320px] sm:h-[430px] rounded-xl border border-slate-200 object-cover object-top shadow-sm"
+              />
+            </div>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {project.tags.map((tag: string) => (
+                <span key={tag} className="bg-slate-100 text-slate-700 px-3 py-1 rounded-full text-xs font-semibold border border-slate-200">
+                  {tag}
+                </span>
+              ))}
             </div>
           </div>
+        )}
+
+        {/* Product Screenshots Gallery */}
+        {galleryItems.length > 0 && (
+          <section className="mb-8">
+            <h2 className="text-lg font-semibold text-slate-900 mb-4">
+              {language === 'vi' ? 'Hình ảnh sản phẩm' : language === 'zh' ? '产品界面截图' : 'Product Screens'}
+            </h2>
+            <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+              <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-[linear-gradient(160deg,#f8fafc_0%,#ecfeff_100%)]">
+                <div
+                  className="flex transition-transform duration-500 ease-out"
+                  style={{ transform: `translateX(-${activeSlide * 100}%)` }}
+                >
+                  {galleryItems.map((item: { src: string; alt: string }, index: number) => (
+                    <figure key={`${item.src}-${index}`} className="min-w-full p-3 sm:p-4">
+                      <img
+                        src={item.src}
+                        alt={item.alt}
+                        loading="lazy"
+                        decoding="async"
+                        className="h-72 sm:h-[420px] w-full rounded-lg border border-slate-200 bg-white object-contain object-top"
+                      />
+                      <figcaption className="pt-3 text-sm text-slate-600 leading-relaxed">
+                        {item.alt}
+                      </figcaption>
+                    </figure>
+                  ))}
+                </div>
+
+                {galleryItems.length > 1 && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={goToPrevSlide}
+                      aria-label={language === 'vi' ? 'Ảnh trước' : language === 'zh' ? '上一张' : 'Previous image'}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full border border-white/70 bg-white/90 p-2 text-slate-700 shadow hover:bg-white"
+                    >
+                      <ChevronLeft className="size-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={goToNextSlide}
+                      aria-label={language === 'vi' ? 'Ảnh tiếp theo' : language === 'zh' ? '下一张' : 'Next image'}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full border border-white/70 bg-white/90 p-2 text-slate-700 shadow hover:bg-white"
+                    >
+                      <ChevronRight className="size-4" />
+                    </button>
+                  </>
+                )}
+              </div>
+
+              {galleryItems.length > 1 && (
+                <>
+                  <div className="mt-4 flex justify-center gap-2">
+                    {galleryItems.map((_: unknown, index: number) => (
+                      <button
+                        key={index}
+                        type="button"
+                        onClick={() => goToSlide(index)}
+                        aria-label={`${language === 'vi' ? 'Đi đến ảnh' : language === 'zh' ? '跳转到图片' : 'Go to image'} ${index + 1}`}
+                        className={`h-2.5 rounded-full transition-all ${
+                          index === activeSlide ? 'w-7 bg-cyan-600' : 'w-2.5 bg-slate-300 hover:bg-slate-400'
+                        }`}
+                      />
+                    ))}
+                  </div>
+
+                  <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                    {galleryItems.map((item: { src: string; alt: string }, index: number) => (
+                      <button
+                        key={`${item.src}-thumb-${index}`}
+                        type="button"
+                        onClick={() => goToSlide(index)}
+                        className={`overflow-hidden rounded-lg border bg-white p-1.5 text-left transition ${
+                          index === activeSlide
+                            ? 'border-cyan-500 ring-2 ring-cyan-200'
+                            : 'border-slate-200 hover:border-slate-300'
+                        }`}
+                      >
+                        <img
+                          src={item.src}
+                          alt={item.alt}
+                          loading="lazy"
+                          decoding="async"
+                          className="h-20 w-full rounded-md object-cover object-top"
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          </section>
         )}
         
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 mb-6 leading-tight bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
@@ -141,13 +264,13 @@ export default function ProjectDetailContent({ project }: { project: any }) {
       {/* Content Grid */}
       <div className="grid gap-8">
         {/* Context */}
-        <section className="group hover:scale-[1.02] transition-transform">
-          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-8 rounded-2xl shadow-md border-l-4 border-blue-500">
+        <section>
+          <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 bg-blue-500 rounded-lg">
-                <Info className="size-6 text-white" />
+              <div className="p-2 bg-sky-100 rounded-lg border border-sky-200">
+                <Info className="size-6 text-sky-600" />
               </div>
-              <h2 className="text-2xl font-bold text-slate-900">Context</h2>
+              <h2 className="text-2xl font-bold text-slate-900">{sectionTitle.context}</h2>
             </div>
             <div className="text-slate-700 leading-relaxed">
               {contextParsed.map((item: any, idx: number) => {
@@ -158,7 +281,7 @@ export default function ProjectDetailContent({ project }: { project: any }) {
                     <ul key={idx} className="mb-4 space-y-2 ml-4">
                       {(item.content as string[]).map((bullet: string, bidx: number) => (
                         <li key={bidx} className="flex gap-3 items-start">
-                          <span className="text-blue-500 font-bold text-lg mt-0.5">•</span>
+                          <span className="text-sky-500 font-bold text-lg mt-0.5">•</span>
                           <span className="flex-1 leading-7">{bullet}</span>
                         </li>
                       ))}
@@ -172,13 +295,13 @@ export default function ProjectDetailContent({ project }: { project: any }) {
         </section>
 
         {/* Problem */}
-        <section className="group hover:scale-[1.02] transition-transform">
-          <div className="bg-gradient-to-br from-red-50 to-pink-50 p-8 rounded-2xl shadow-md border-l-4 border-red-500">
+        <section>
+          <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 bg-red-500 rounded-lg">
-                <AlertCircle className="size-6 text-white" />
+              <div className="p-2 bg-rose-100 rounded-lg border border-rose-200">
+                <AlertCircle className="size-6 text-rose-600" />
               </div>
-              <h2 className="text-2xl font-bold text-slate-900">Problem</h2>
+              <h2 className="text-2xl font-bold text-slate-900">{sectionTitle.problem}</h2>
             </div>
             <div className="text-slate-700 leading-relaxed">
               {problemParsed.map((item: any, idx: number) => {
@@ -189,7 +312,7 @@ export default function ProjectDetailContent({ project }: { project: any }) {
                     <ul key={idx} className="mb-4 space-y-2 ml-4">
                       {(item.content as string[]).map((bullet: string, bidx: number) => (
                         <li key={bidx} className="flex gap-3 items-start">
-                          <span className="text-red-500 font-bold text-lg mt-0.5">•</span>
+                          <span className="text-rose-500 font-bold text-lg mt-0.5">•</span>
                           <span className="flex-1 leading-7">{bullet}</span>
                         </li>
                       ))}
@@ -203,13 +326,13 @@ export default function ProjectDetailContent({ project }: { project: any }) {
         </section>
 
         {/* Solution */}
-        <section className="group hover:scale-[1.02] transition-transform">
-          <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-8 rounded-2xl shadow-md border-l-4 border-green-500">
+        <section>
+          <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 bg-green-500 rounded-lg">
-                <Lightbulb className="size-6 text-white" />
+              <div className="p-2 bg-emerald-100 rounded-lg border border-emerald-200">
+                <Lightbulb className="size-6 text-emerald-600" />
               </div>
-              <h2 className="text-2xl font-bold text-slate-900">Solution</h2>
+              <h2 className="text-2xl font-bold text-slate-900">{sectionTitle.solution}</h2>
             </div>
             <div className="text-slate-700 leading-relaxed">
               {solutionParsed.map((item: any, idx: number) => {
@@ -220,7 +343,7 @@ export default function ProjectDetailContent({ project }: { project: any }) {
                     <ul key={idx} className="mb-4 space-y-2 ml-4">
                       {(item.content as string[]).map((bullet: string, bidx: number) => (
                         <li key={bidx} className="flex gap-3 items-start">
-                          <span className="text-green-500 font-bold text-lg mt-0.5">•</span>
+                          <span className="text-emerald-500 font-bold text-lg mt-0.5">•</span>
                           <span className="flex-1 leading-7">{bullet}</span>
                         </li>
                       ))}
@@ -234,13 +357,13 @@ export default function ProjectDetailContent({ project }: { project: any }) {
         </section>
 
         {/* Result */}
-        <section className="group hover:scale-[1.02] transition-transform">
-          <div className="bg-gradient-to-br from-purple-50 to-violet-50 p-8 rounded-2xl shadow-md border-l-4 border-purple-500">
+        <section>
+          <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 bg-purple-500 rounded-lg">
-                <TrendingUp className="size-6 text-white" />
+              <div className="p-2 bg-violet-100 rounded-lg border border-violet-200">
+                <TrendingUp className="size-6 text-violet-600" />
               </div>
-              <h2 className="text-2xl font-bold text-slate-900">Result</h2>
+              <h2 className="text-2xl font-bold text-slate-900">{sectionTitle.result}</h2>
             </div>
             <div className="text-slate-700 leading-relaxed">
               {resultParsed.map((item: any, idx: number) => {
@@ -251,7 +374,7 @@ export default function ProjectDetailContent({ project }: { project: any }) {
                     <ul key={idx} className="mb-4 space-y-2 ml-4">
                       {(item.content as string[]).map((bullet: string, bidx: number) => (
                         <li key={bidx} className="flex gap-3 items-start">
-                          <span className="text-purple-500 font-bold text-lg mt-0.5">•</span>
+                          <span className="text-violet-500 font-bold text-lg mt-0.5">•</span>
                           <span className="flex-1 leading-7">{bullet}</span>
                         </li>
                       ))}
@@ -266,7 +389,7 @@ export default function ProjectDetailContent({ project }: { project: any }) {
 
         {/* CTA */}
         <section className="mt-4">
-          <div className="bg-gradient-to-br from-cyan-500 via-blue-500 to-indigo-500 p-8 rounded-2xl shadow-xl text-center text-white relative overflow-hidden">
+          <div className="bg-[linear-gradient(140deg,#0891b2_0%,#2563eb_100%)] p-8 rounded-2xl shadow-xl text-center text-white relative overflow-hidden">
             <div className="absolute inset-0 bg-grid-white/10"></div>
             <div className="relative z-10">
               <Award className="size-12 mx-auto mb-4 opacity-90" />

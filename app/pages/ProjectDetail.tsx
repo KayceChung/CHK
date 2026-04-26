@@ -3,6 +3,7 @@ import { ArrowLeft } from 'lucide-react';
 import projectsData from '../data/projects';
 import { useProject, transformProjectForLanguage } from '../hooks/useSupabaseData';
 import ProjectDetailContent from '../components/projects/ProjectDetailContent';
+import ConstructTrackShowcase from '../components/projects/ConstructTrackShowcase';
 import { Button } from '../components/ui/button';
 
 const FORCE_STATIC_IMAGE_SLUGS = new Set(['chung-tieu-dinh-portfolio']);
@@ -10,6 +11,7 @@ const FORCE_STATIC_IMAGE_SLUGS = new Set(['chung-tieu-dinh-portfolio']);
 export default function ProjectDetail() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const isConstructTrack = slug === 'constructtrack-construction-progress-platform';
 
   const { project: supabaseProject, loading } = useProject(slug || '');
   
@@ -37,6 +39,25 @@ export default function ProjectDetail() {
         <div className="text-center">
           <h1 className="text-3xl font-bold text-gray-900 mb-4">Loading project...</h1>
           <p className="text-gray-600">Fetching the latest case study details.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isConstructTrack) {
+    return (
+      <div className="min-h-screen pt-24 pb-12">
+        <div className="mx-auto max-w-7xl px-4">
+          <Button
+            onClick={() => navigate('/projects')}
+            variant="ghost"
+            className="mb-6 gap-2"
+          >
+            <ArrowLeft className="size-4" />
+            Back to Projects
+          </Button>
+
+          <ConstructTrackShowcase />
         </div>
       </div>
     );

@@ -1,9 +1,16 @@
 import ProjectCard from './ProjectCard';
 
 export default function ProjectList({ projects }: { projects: any[] }) {
-  if (!projects.length) return <div>No projects found.</div>;
+  if (!projects.length) {
+    return (
+      <div className="rounded-2xl border border-slate-200 bg-white p-8 text-slate-600">
+        No projects found.
+      </div>
+    );
+  }
+
   return (
-    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+    <div className="grid gap-8 md:grid-cols-2">
       {projects.map(project => (
         <ProjectCard key={project.slug} project={project} />
       ))}

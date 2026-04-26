@@ -34,6 +34,16 @@ const projects = [
   {
     slug: 'constructtrack-construction-progress-platform',
     image: '/constructtrack-cover.png',
+    gallery: [
+      {
+        src: '/constructtrack-cover.png',
+        alt: 'ConstructTrack – Dashboard tổng quan dự án và các KPI vận hành',
+      },
+      {
+        src: '/constructtrack-screens/projects-list.png',
+        alt: 'ConstructTrack – Giao diện danh sách dự án đang quản lý',
+      },
+    ],
     tags: ['React', 'TypeScript', 'Tailwind CSS', 'Zustand', 'Supabase', 'Kanban', 'CRM'],
     content: {
       en: {
